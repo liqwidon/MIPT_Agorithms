@@ -1,0 +1,64 @@
+/*
+    ============================================================================
+    Название   : second_1_2
+    Автор      : Alex M.
+    Версия     : 1.0
+    Копирайт   :
+    Описание   : Задание 1_2 второго задания
+    ============================================================================
+*/
+/*
+    нужно переделать сравнение и отформатировать код
+*/
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+struct Point
+{
+    Point()
+    {}
+
+    Point(int x_, int y_)
+        :x{x_}, y{y_}
+    {}
+
+    int x;
+    int y;
+};
+
+bool Cless(const Point& p1, const Point& p2)
+{
+    if (p1.x <= p2.x)
+    return (p1.x < p2.x || p1.y < p2.y);
+    return false;
+}
+
+void insertion_sort(vector<Point>& points)
+{
+    for( int i = 1; i < points.size(); ++i )
+    {
+        for(int j = i; j > 0 && Cless(points[j], points[j-1]); --j )
+        {
+            swap(points[j-1], points[j]);
+        }
+    }
+}
+
+int main()
+{
+    int n;
+    cin >> n;
+    vector<Point> points;
+    for (int i = 0, x = 0, y = 0; i < n; ++i)
+    {
+        cin >> x >> y;
+        Point temp (x,y);
+        points.push_back(temp);
+    }
+    insertion_sort(points);
+    for (int i = 0; i < n; ++i)
+        cout << points[i].x << " " << points[i].y << " " << endl;
+    return 0;
+}
