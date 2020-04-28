@@ -1,0 +1,229 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+
+struct person
+{
+    struct Date
+    {
+        int day;
+        int month;
+        int year;
+    };
+    Date birth;
+    Date funeral;
+};
+
+istream& operator>> (istream &is, person :: Date &d)
+{
+    return is >> d.day >> d.month >> d.year;
+}
+
+ostream& operator<< (ostream &os, const person :: Date &d)
+{
+    return os << d.day << " " << d.month << " " << d.year;
+}
+
+istream& operator>> (std::istream &is, person &p)
+{
+
+    return is >> p.birth >> p.funeral;
+}
+
+ostream& operator<< (std::ostream &os, person &p)
+{
+
+    return os << p.birth << " " << p.funeral;
+}
+
+int age (const person &p)
+{
+
+    return (p.funeral.year - p.birth.year +
+            (p.funeral.month > p.birth.month ? true : p.funeral.month == p.birth.month and
+                                               p.funeral.day >= p.birth.day)) - 1;
+}
+
+bool operator<(const person :: Date &lhs, const person :: Date &rhs)
+{
+    return (lhs.year < rhs.year ? true : lhs.year == rhs.year and lhs.month < rhs.month ? true :
+                                                                                          lhs.year == rhs.year and
+                                                                                          lhs.month == rhs.month and
+                                                                                          lhs.day < rhs.day);
+}
+
+bool operator==(const person :: Date &lhs, const person :: Date &rhs)
+{
+    return lhs.year == rhs.year and lhs.month == rhs.month and lhs.day == rhs.day;
+}
+
+bool operator<=(const person :: Date &lhs, const person :: Date &rhs)
+{
+    return lhs < rhs or lhs == rhs;
+}
+
+bool operator>(const person :: Date &lhs, const person :: Date &rhs)
+{
+    return !(lhs <= rhs);
+}
+
+template <class T>
+ostream& operator << (ostream& out, const vector<T>& a)
+{
+    for(int i = 0; i < a.size(); ++i)
+        out << a[i] << " ";
+    return out;
+}
+
+bool coeval(const person &lhs, const person &rhs) {
+    return (rhs.birth < lhs.funeral and lhs.birth <= rhs.birth) or
+            (rhs.birth <= lhs.birth and lhs.birth < rhs.funeral);
+}
+
+template <class T>
+class Heap
+{
+public:
+    Heap()
+    {}
+    Heap(const vector<person>& arr)
+    {
+        from(arr);
+    }
+    Heap& operator=(const Heap<T>& h)
+    {
+        this->h = h.h;
+        return *this;
+    }
+    Heap& operator=(const vector<person>& arr)
+    {
+        from(arr);
+        return *this;
+    }
+    void push(const person& val)
+    {
+        h.push_back(val);
+        sift_up(h.size() - 1);
+    }
+    const person& top() const
+    {
+        return h.front();
+    }
+    void pop()
+    {
+        swap(h.front(), h.back());
+        h.pop_back();
+        sift_down(0);
+    }
+
+    int size()
+    {
+        return h.size();
+    }
+
+    friend ostream& operator << (ostream& out, const Heap& heap)
+    {
+        out << heap.h;
+        return out;
+    }
+
+private:
+    void from(const vector<person>& arr)
+    {
+        h = arr;
+        for(int i = h.size() / 2 - 1; i >= 0; --i)
+            sift_down(i);
+    }
+    void sift_up(int i)
+    {
+        while(i > 0)
+        {
+            int p = (i - 1) / 2;
+            if(h[i] <= h[p])//что это для персон значит??
+                return;
+            swap(h[i], h[p]);
+            i = p;
+        }
+    }
+    void sift_down(int i)
+    {
+        int l = 2 * i + 1;
+        int r = l + 1;
+        int mx = i;
+        if(r < h.size() && h[r] > h[mx])
+            mx = r;
+        if(l < h.size() && h[l] > h[mx])
+            mx = l;
+        if(mx != i)
+        {
+            swap(h[i], h[mx]);
+            sift_down(mx);
+        }
+    }
+
+    vector<person> h;
+};
+
+int main()
+{
+    int n = 0;
+    cin >> n;
+    vector<person :: Date> data[n];
+    vector<person> a;
+
+    for (auto i = 0; i < n; ++i)
+    {
+
+        person tmp{{0, 0, 0}, {0, 0, 0}};
+
+        cin >> tmp;
+
+        if (age(tmp) < 18 or (age(tmp) == 18 and tmp.birth.month == tmp.funeral.month and tmp.birth.day == tmp.funeral.day)) {
+            --n;
+            --i;
+            continue;
+        }
+
+        if (age(tmp) >= 80) {
+            tmp.funeral.year -= (age(tmp) - 80);
+            if (tmp.funeral.month < tmp.birth.month or (tmp.funeral.month == tmp.birth.month and
+                                                        tmp.funeral.day < tmp.birth.day))
+                --tmp.funeral.year;
+            tmp.funeral.month = tmp.birth.month;
+            tmp.funeral.day = tmp.birth.day;
+        }
+
+        tmp.birth.year += 18;
+
+        a.push_back(tmp);
+    }
+
+    sort(a.begin(), a.end());
+
+    Heap<person> src{};
+    int res = 0;
+
+    for (auto i = 0; i < n; ++i) {
+        if (!src.size()) {
+            src.push(a[i]);
+        }
+        else if (coeval(a[i], src.top())) {
+            src.push(a[i]);
+        }
+        else {
+            res = std::max(res, static_cast<int>(src.size()));
+            while (src.size() and !coeval(a[i], src.top()))
+                src.pop();
+            src.push(a[i]);
+        }
+    }
+
+    res = std::max(res, static_cast<int>(src.size()));
+
+
+
+    return 0;
+}
