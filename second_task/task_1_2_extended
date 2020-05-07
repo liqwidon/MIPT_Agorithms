@@ -1,0 +1,82 @@
+//1_2 расширенная
+
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+struct Point
+{
+    Point()
+    {}
+
+    Point(int _x, int _y)
+        : x(_x), y(_y)
+    {}
+
+    int x;
+    int y;
+};
+
+struct lessPoint
+{
+    bool operator()(const Point &p1, const Point &p2)
+    {
+        if (p1.x <= p2.x)
+            return (p1.x < p2.x || p1.y < p2.y);
+        return false;
+    }
+};
+
+inline bool lessInt(int i1, int i2)
+{
+    return i1 < i2;
+}
+
+template <typename T, typename less = std::less<T> >
+void insertion_sort(vector<T>& points, less L = std::less<T>())
+{
+    for( int i = 1; i < points.size(); ++i )
+    {
+        T tmp = points[i];
+        int j = i - 1;
+        for( ; j >= 0 && L(tmp, points[j]); --j )
+        {
+            points[j + 1] = points[j];
+        }
+        points[j + 1] = tmp;
+    }
+}
+
+istream& operator>> (istream &is, Point &p)
+{
+    return is >> p.x >> p.y;
+}
+
+ostream& operator<< (ostream &os, const Point &p)
+{
+    return os << p.x << " " << p.y;
+}
+
+int main()
+{
+    vector<int> a;
+    insertion_sort(a, [](int i1, int i2)->bool{return i1 < i2;});
+
+    int n;
+    cin >> n;
+    vector<Point> points;
+    for (int i = 0; i < n; ++i)
+    {
+        Point temp;
+        cin >> temp;
+        points.push_back(temp);
+    }
+
+    insertion_sort(points, lessPoint());
+
+    for (int i = 0; i < n; ++i)
+        cout << points[i] << endl;
+
+    return 0;
+}
