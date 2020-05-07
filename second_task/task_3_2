@@ -1,0 +1,68 @@
+#include <iostream>
+
+using namespace std;
+
+template < typename T, typename less = std::less<T> >
+size_t M_pivot(T *a, size_t l, size_t r, less L = std::less<T>())
+{
+    size_t m = l + (r - l) / 2;
+    if (L (a[m], a[l]))
+    {
+        if (L (a[l], a[r]))
+          return l;
+        return (L (a[r], a[m])) ? m : r;
+    }
+    if (L (a[m], a[r]))
+        return m;
+      return (L (a[r], a[l])) ? l : r;
+}
+
+template < typename T, typename less = std::less<T> >
+size_t partition(T* a, size_t l, size_t r, less L = std::less<T>())
+{
+    swap(a[M_pivot(a, l, r, L)], a[l]);
+    size_t i = r, j = r;
+    while(L (l, j))
+    {
+        if(L (a[l], a[j]) || a[l] == a[j])
+        {
+            swap(a[i], a[j]);
+            --i;
+        }
+        --j;
+    }
+    swap(a[l], a[i]);
+    return i;
+}
+
+template < typename T, typename less = std::less<T> >
+size_t statistic(T* a, size_t n, size_t k, less L = std::less<T>())
+{
+    size_t l = 0, r = n - 1;
+    while(L (l, r))
+    {
+        size_t p = partition(a, l, r, L);
+        if(k == p)
+            return a[p];
+        if(L (k, p))
+            r = p - 1;
+        else
+            l = p + 1;
+    }
+    return a[l];
+}
+
+int main()
+{
+    size_t n, k;
+    cin >> n >> k;
+
+    size_t * a = new size_t [n];
+
+    for(size_t i = 0; i < n ; ++i)
+        cin >> a[i];
+
+    cout << statistic(a, n, k);
+
+    return 0;
+}
