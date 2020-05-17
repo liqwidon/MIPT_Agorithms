@@ -1,0 +1,37 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+
+struct Athlete
+{
+    int si;
+    int mi;
+
+    bool operator<(const Athlete a) const
+    {
+        return mi < a.mi ? true : (mi > a.mi ? false : si < a.si);
+    }
+};
+
+
+
+int main()
+{
+    std::vector<Athlete> v;
+    for(Athlete a; std :: cin >> a.mi >> a.si;)
+        v.push_back(a);
+    std :: sort(v.begin(), v.end());
+    int height = 0;
+    for(int i = 0, mass = 0; i < v.size(); ++i)
+    {
+        if(v[i].si >= mass)
+        {
+            ++height;
+            mass += v[i].mi;
+        }
+    }
+
+    std :: cout << height << '\n';
+
+    return 0;
+}
