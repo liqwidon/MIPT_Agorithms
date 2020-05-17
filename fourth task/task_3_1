@@ -1,0 +1,44 @@
+#include <iostream>
+typedef int64_t i64;
+using namespace std;
+
+i64 pirCount(int n, int w, i64 **st)
+{
+    if (st[n][w] != -1)
+        return st[n][w];
+
+    i64 count = 0;
+    if (n >= w)
+    {
+        for (int i = n - w; i < n; ++i)
+            count += pirCount(i, n - i, st);
+    }
+    else
+    {
+        count = 1;
+        for (int i = 1; i < n; ++i)
+            count += pirCount(i, n - i, st);
+    }
+
+    st[n][w] = count;
+    return count;
+}
+
+int main()
+{
+    i64 n;
+    cin >> n;
+
+    i64 *matr = new i64 [(n + 1) * (n + 1)];
+    i64 **st = new i64* [n + 1];
+
+    for (int i = 0; i < n + 1; ++i)
+        st[i] = matr + i * (n + 1);
+
+    for (int i = 0; i < (n + 1) * (n + 1); ++i)
+        matr[i] = -1;
+
+    cout << pirCount(n, n, st);
+
+    return 0;
+}
