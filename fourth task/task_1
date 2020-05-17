@@ -1,0 +1,201 @@
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+template <typename T>
+int myHash(T st, int n)
+{
+    return hash<T>(st);
+}
+
+//template <>
+//int myHash<int>(int st, int n)
+//{
+//    return st;
+//}
+
+template <>
+int myHash<string>(string st, int n)
+{
+    int h = 0;
+    for (int i = 0; i < st.size(); ++i)
+    {
+        h = (h * 5 + st[i]) % n;
+    }
+    return h;
+}
+
+template <typename T>
+class HashTable
+{
+    enum CellState
+    {
+        EMPTY = 0, FILLED, DELETED
+    };
+public:
+    HashTable()
+    {
+        v.resize(8);
+        state.resize(8);
+    }
+    
+    bool insert(const T& elem)
+    {
+        if (size_ * 4 == v.size() * 3)
+        {
+            vector<T> nv (2 * v.size());
+            vector<CellState> nstate (2 * v.size());
+            for (int i = 0; i < v.size(); ++i)
+                if (state[i] == FILLED)
+                    for (int j = 0, h = myHash(v[i], nv.size()); j < nv.size(); ++j, h = (h + j + 1) % nv.size())
+                        if (nstate[h] != FILLED)
+                        {
+                            nv[h] = v[i];
+                            nstate[h] = FILLED;
+                            break;
+                        }
+            swap(v, nv);
+            swap(state, nstate);
+        }
+        
+        int p = -1;
+        
+        for (int i = 0, h = myHash(elem, v.size()); i < v.size(); ++i)
+        {
+            switch (state[h])
+            {
+            case EMPTY:
+            {
+                if (p == -1)
+                    p = h;
+                
+                v[p] = elem;
+                state[p] = FILLED;
+                ++size_;
+                return true;
+                
+            }
+            case FILLED:
+            {
+                if (v[h] == elem)
+                    return false;
+                h = (h + i + 1) % v.size();
+                break;
+            }
+            case DELETED:
+            {
+                if (p == -1)
+                    p = h;
+                h = (h + i + 1) % v.size();
+                break;
+            }
+            }
+        }
+        if (p != -1)
+        {
+            v[p] = elem;
+            state[p] = FILLED;
+            ++size_;
+            return true;
+        }
+        return false;
+    }
+    
+    bool remove(const T& elem)
+    {
+        for (int i = 0, h = myHash(elem, v.size()); i < v.size() ;++i)
+        {
+            switch (state[h])
+            {
+            case EMPTY:
+                return false;
+            case FILLED:
+                if (v[h] == elem)
+                {
+                    v[h] = T();
+                    state[h] = DELETED;
+                    --size_;
+                    return true;
+                }
+                h = (h + i + 1) % v.size();
+                break;
+            case DELETED:
+                h = (h + i + 1) % v.size();
+                break;
+            }
+        }
+        return false;
+    }
+    
+    bool contains(const T& elem) const
+    {
+        for (int i = 0, h = myHash(elem, v.size()); i < v.size() ; ++i)
+        {
+            switch (state[h])
+            {
+            case EMPTY:
+                return false;
+            case FILLED:
+                if (v[h] == elem)
+                    return true;
+                h = (h + i + 1) % v.size();
+                break;
+            case DELETED:
+                h = (h + i + 1) % v.size();
+                break;
+            }
+        }
+        return false;
+    }
+    
+private:
+    
+    vector<T> v;
+    vector<CellState> state;
+    int size_;
+};
+
+enum commands
+{
+    INSERT = '+', REMOVE = '-', CONTAINS = '?'
+};
+
+int main()
+{
+    HashTable<string> tb;
+    char cmd;
+    string s;
+    
+    while(cin >> cmd >> s)
+    {
+        switch (cmd)
+        {
+        case INSERT:
+        {
+            if (tb.insert(s))
+                cout << "OK" << endl;
+            else
+                cout << "FAIL" << endl;
+            break;
+        }
+        case REMOVE:
+        {
+            if (tb.remove(s))
+                cout << "OK" << endl;
+            else
+                cout << "FAIL" << endl;
+            break;
+        }
+        case CONTAINS:
+        {
+            if (tb.contains(s))
+                cout << "OK" << endl;
+            else
+                cout << "FAIL" << endl;
+            break;
+        }
+        }
+    }
+    return 0;
+}
