@@ -1,0 +1,119 @@
+/*
+    ============================================================================
+    Название   : second_4_2
+    Автор      : Alex M.
+    Версия     : 1.2(заменил quick_sort на merge_sort для стабильного O(klogk))
+    Копирайт   :
+    Описание   : Задание 4_2 второго задания
+    ============================================================================
+*/
+#include <iostream>
+
+using namespace std;
+
+///merge sort с семинара, доделанная
+/// используем ее, так как у нее стабильно O(nlogn)
+void merge (const int *b0, const int *e0, const int *b1, const int *e1, int *r)
+{
+    while (b0 != e0 && b1 != e1)
+    {
+        if (*b0 < *b1)
+            *(r++) = *(b0++);
+        else
+            *(r++) = *(b1++);
+    }
+    while (b0 != e0)
+        *(r++) = *(b0++);
+    while (b1 != e1)
+        *(r++) = *(b1++);
+}
+
+void merge_sort_(int *b, int *e, int *r)
+{
+    if (e - b <= 1) return;
+    int *m = b + (e - b) / 2;
+    merge_sort_(b, m, r);
+    merge_sort_(m, e, r);
+    merge(b, m, m, e, r);
+    while (b != e)
+        *(b++) = *(r++);
+}
+
+///
+void merge_sort(int *b, int *e, int size)
+{
+    int* tmp = new int [size];
+    merge_sort_(b, e, tmp);
+    for (int z = 0; z < size; ++z)
+        b[z] = tmp[z];
+    delete [] tmp;
+}
+
+
+//краткая идея - записываем к элементов в массив, сортируем, записываем следующие к(или меньше, если конец), сортируем их,
+//сливаем, выводим первые к или j, если конец, меняем старые на вторую часть массива, по новой пока не закончим
+
+int main()
+{
+    int n, k;
+    cin >> n >> k;
+
+    //создадим доп память в 2 размера к (это О(2к) = О(к))
+    int* data = new int[2 * k];
+    int i = 0;
+
+    //запишем первые k элементов
+    while (i < k)
+        cin >> data[i++];
+
+    //отсортируем их
+    merge_sort(data, data + k, k);
+
+    while (i < n)
+    {
+        int j = k;
+        //вводим следующие новые к(или меньше к, если дело идет к концу)
+        for ( ;i < n and j < 2 * k; ++j)
+        {
+            cin >> data[j];
+            i++;
+        }
+
+        //сортируем эти к-j элементов, которые ввели
+        merge_sort(data + k, data + j, j - k);
+
+        //сливаем старые и новые элементы
+        int* c = new int [2 * k];
+        merge(data, data + k, data + k, data + j, c);
+
+        //переносим отсортированную часть j штук(j <= k)
+        for (int z = 0; z < j; ++z)
+            data[z] = c[z];
+
+        delete[] c;
+
+        //если это последний раз, то выводим по конца
+        if (i == n)
+        {
+            for (int z = 0; z < j; ++z)
+            {
+                cout << data[z] << " ";
+            }
+        }
+        //если не последний, то выводим очередные к элементов
+        else
+        {
+            for (int z = 0; z < k; ++z)
+            {
+                cout << data[z] << " ";
+            }
+
+            //записываем на место старых к элементов новые к
+            for (int t = 0; t < k; ++t)
+                data[t] = (data + k)[t];
+        }
+    }
+
+    delete[] data;
+    return 0;
+}
