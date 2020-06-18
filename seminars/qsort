@@ -1,0 +1,65 @@
+#include <iostream>
+
+using namespace std;
+
+int Rand_pivot(int * ,int l, int r)
+{
+    return rand() % (r - l + 1) + l;
+}
+
+int M_pivot(int *a, int l, int r)
+{
+    int m = (l + r) / 2;
+    if((a[l] > a[r] && a[l] < a[m]) ||(a[l] < a[r] && a[l] > a[m]))
+        return l;
+    if((a[r] > a[l] && a[r] < a[m]) ||(a[r] < a[l] && a[r] > a[m]))
+        return r;
+    if((a[m] > a[r] && a[m] < a[l]) ||(a[m] < a[r] && a[m] > a[l]))
+        return m;
+    return r;
+}
+
+int partion(int *a, int l, int r)
+{
+    // swap(a[Rand_pivot(a, l, r)], a[r]);
+    swap(a[M_pivot(a, l, r)], a[r]);
+    int i = l, j = l;
+    while(j < r)
+    {
+        if(a[j] <= a[r])
+        {
+            swap(a[i], a[j]);
+            ++i;
+        }
+        ++j;
+    }
+    swap(a[r], a[i]);
+    return i;
+}
+
+void quick_sort(int *a, int l, int r)
+{
+    if (l < r)
+    {
+       int p = partion(a, l, r);
+       quick_sort(a, l, p - 1);
+       quick_sort(a, p + 1, r);
+    }
+}
+
+int main()
+{
+    int n;
+    cin >> n;
+    int * a = new int [n];
+    for(int i = 0; i < n ; ++i)
+        cin >> a[i];
+
+    quick_sort(a, 0, n - 1);
+
+    for(int i = 0; i < n ; ++i)
+        cout << a[i] << " ";
+
+    return 0;
+
+}
