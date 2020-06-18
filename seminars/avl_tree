@@ -1,0 +1,155 @@
+#include <iostream>
+
+using namespace std;
+
+class avltree
+{
+    struct Node
+    {
+        Node(int k)
+            : k(k), h(1), l(), r()
+        {}
+        int hl() const //высота левого поддерева
+        {
+            return l ? l->h : 0;
+        }
+        int hr() const //высота правого поддерева
+        {
+            return r ? r->h : 0;
+        }
+
+        int dh() const
+        {
+            return hr() - hl();
+        }
+
+        void update()
+        {
+            h = max(hl(), hr()) + 1;
+        }
+        int k;
+        int h;
+        Node *l, *r;
+    };
+
+public:
+
+    avltree()
+        : root_()
+    {}
+
+    void insert(int k)
+    {
+        insert(root_, k);
+    }
+
+    void remove(int k)
+    {
+        remove(root_, k);
+    }
+
+
+private:
+    void insert(Node *&n, int k)
+    {
+        if (n == nullptr)
+        {
+            n = new Node(k);
+            return;
+        }
+        if (k < n->k)
+            insert(n->l, k);
+        else
+            insert(n->r, k);
+        balance(n);
+
+    }
+
+    void remove(Node *&n, int k)
+    {
+        if (n == 0)
+            return;
+        if (k < n->k)
+            remove(n->l, k);
+        else if (n->k < k)
+            remove(n->r, k);
+        else if (n->l == 0)
+        {
+            Node* r = n->r;
+            delete n;
+            n = r;
+            return;
+        }
+        else if (n->r == 0)
+        {
+            Node* l = n->l;
+            delete n;
+            n = l;
+            return;
+        }
+        else
+            rm_mn(n->r, n->k);
+        balance(n);
+    }
+
+    void rm_mn(Node *&n, int &k)
+    {
+        if (n->l == 0)
+        {
+            Node* r = n->r;
+            k = n->k;
+            delete n;
+            n = r;
+            return;
+        }
+        rm_mn(n->l, k);
+        balance(n);
+    }
+
+    void rot_left(Node *&n)
+    {
+        Node *b = n->r;
+        n->r = b->l;
+        b->l = n;
+        n = b;
+        b->l->update();
+        b->update();
+    }
+
+    void rot_right(Node *&n)
+    {
+        Node *b = n->l;
+        n->l = b->r;
+        b->r = n;
+        n = b;
+        b->r->update();
+        b->update();
+    }
+
+    void balance(Node *&n)
+    {
+        n->update();
+        if (n->dh() >= 2)
+        {
+            if (n->l->dh() < 0 )
+                rot_right(n->r);
+            rot_left(n);
+        }
+        else if (n->dh() <= -2)
+        {
+            if (n->l->dh() > 0 )
+                rot_left(n->l);
+            rot_right(n);
+        }
+    }
+
+
+    Node* root_;
+};
+
+
+int main()
+{
+    cout << "Hello World!" << endl;
+    return 0;
+}
