@@ -1,0 +1,61 @@
+#include <iostream>
+
+using namespace std;
+
+int getByte(long long number, long long n)
+{
+    return number >> (8 * n) & 255;
+}
+
+void countingSort(long long *data, const long long size, const long long byte)
+{
+    long long counters[256];
+
+    for(long long i = 0; i < 256; ++i)
+        counters[i] = 0;
+
+    for(long long i = 0; i < size; ++i)
+        ++counters[getByte(data[i], byte)];
+
+    for(long long i = 1; i < 256; ++i)
+        counters[i] += counters[i - 1];
+
+    long long *tmp = new long long[size];
+
+    for(long long i = size - 1; i >= 0; --i)
+        tmp[--counters[getByte(data[i], byte)]] = data[i];
+
+    for(long long i = 0; i < size; ++i)
+        data[i] = tmp[i];
+
+    delete[] tmp;
+}
+
+void LSDsort(long long *data, const long long size)
+{
+    long long bytes_number = sizeof(long long);
+
+    for(long long byte = 0; byte < bytes_number; ++byte)
+    {
+        countingSort(data, size, byte);
+    }
+}
+
+int main()
+{
+    long long n = 0;
+    cin >> n;
+
+    long long *data = new long long [n];
+    for (long long i = 0; i < n; ++i)
+        cin >> data[i];
+
+    LSDsort (data, n);
+
+    for (long long i = 0; i < n; ++i)
+        cout << data[i] << " ";
+
+    delete[] data;
+
+    return 0;
+}
