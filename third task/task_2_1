@@ -1,0 +1,117 @@
+#include <iostream>
+
+using namespace std;
+
+
+class btree
+{
+    struct Node
+    {
+        int key;
+        Node *l,*r;
+        Node(int k): key(k),l(),r() {}
+    };
+    Node* root{0};
+public:
+    void Insert(int key)
+    {
+        Insert(root,key);
+    }
+    int depth() const
+    {
+        return depth(root,0);
+    }
+private:
+    void Insert(Node*& n,int key)
+    {
+        if (n == 0)
+            n = new Node(key);
+        else if (key < n->key)
+            Insert(n->l,key);
+        else Insert(n->r,key);
+    }
+    int depth(Node* n,int d) const
+    {
+        if (n == 0)
+            return d;
+        return std::max(depth(n->l,d+1),depth(n->r,d+1));
+    }
+};
+
+
+class dtree
+{
+    struct Node
+    {
+        int key,prior;
+        Node *l,*r;
+        Node(int k,int p): key(k),prior(p),l(),r() {}
+    };
+    Node* root{0};
+public:
+    void Insert(int key,int p)
+    {
+        Insert(root,key,p);
+    }
+    int depth() const
+    {
+        return depth(root,0);
+    }
+private:
+    void Insert(Node*& n,int key,int p)
+    {
+        if (n == 0)
+            n = new Node(key,p);
+        else if (n->prior < p)
+        {
+            Node* n1 = new Node(key,p);
+            split(n,key,n1->l,n1->r);
+            n = n1;
+        }
+        else if (key < n->key)
+            Insert(n->l,key,p);
+        else Insert(n->r,key,p);
+    }
+    int depth(Node* n,int d) const
+    {
+        if (n == 0)
+            return d;
+        return std::max(depth(n->l,d+1),depth(n->r,d+1));
+    }
+    void split(Node* n, int k, Node*& l,Node*& r)
+    {
+        if (n == 0)
+        {
+            l = 0;
+            r = 0;
+        }
+        else if (k < n->key)
+        {
+            split(n->l,k,l,n->l);
+            r = n;
+        }
+        else
+        {
+            split(n->r,k,n->r,r);
+            l = n;
+        }
+    }
+};
+
+
+int main()
+{
+    btree b;
+    dtree d;
+    int n;
+    cin >> n;
+    for (int i=0;i<n;i++)
+    {
+        int k,p;
+        cin >> k >> p;
+        b.Insert(k);
+        d.Insert(k,p);
+    }
+    cout << b.depth()-d.depth();
+    return 0;
+}
