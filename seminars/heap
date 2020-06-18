@@ -1,0 +1,98 @@
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+template <class T>
+ostream& operator << (ostream& out, const vector<T>& a)
+{
+    for(int i = 0; i < a.size(); ++i)
+        out << a[i] << " ";
+    return out;
+}
+
+template <class T>
+class Heap
+{
+public:
+    Heap()
+    {}
+    Heap(const vector<T>& arr)
+    {
+        from(arr);
+    }
+    Heap& operator=(const Heap<T>& h)
+    {
+        this->h = h.h;
+        return *this;
+    }
+    Heap& operator=(const vector<T>& arr)
+    {
+        from(arr);
+        return *this;
+    }
+    void push(const T& val)
+    {
+        h.push_back(val);
+        sift_up(h.size() - 1);
+    }
+    const T& top() const
+    {
+        return h.front();
+    }
+    void pop()
+    {
+        swap(h.front(), h.back());
+        h.pop_back();
+        sift_down(0);
+    }
+
+    friend ostream& operator << (ostream& out, const Heap& heap)
+    {
+        out << heap.h;
+        return out;
+    }
+
+private:
+    void from(const vector<T>& arr)
+    {
+        h = arr;
+        for(int i = h.size() / 2 - 1; i >= 0; --i)
+            sift_down(i);
+    }
+    void sift_up(int i)
+    {
+        while(i > 0)
+        {
+            int p = (i - 1) / 2;
+            if(h[i] <= h[p])
+                return;
+            swap(h[i], h[p]);
+            i = p;
+        }
+    }
+    void sift_down(int i)
+    {
+        int l = 2 * i + 1;
+        int r = l + 1;
+        int mx = i;
+        if(r < h.size() && h[r] > h[mx])
+            mx = r;
+        if(l < h.size() && h[l] > h[mx])
+            mx = l;
+        if(mx != i)
+        {
+            swap(h[i], h[mx]);
+            sift_down(mx);
+        }
+    }
+
+    vector<T> h;
+};
+int main()
+{
+    vector<int> a = {5, 4 ,8 ,5 ,8 ,7, 8};
+    Heap<int> h(a);
+    cout << a << endl << h << endl;
+    return 0;
+}
