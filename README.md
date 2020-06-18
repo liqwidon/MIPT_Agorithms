@@ -1,2 +1,1 @@
-# MIPT_Agorithms
-Materials concerning MIPT DAFE course "Algorithms and Data Structures"
+Алгосы, задачки с контестов и с семинаров
