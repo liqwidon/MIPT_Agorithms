@@ -1,0 +1,84 @@
+#include <iostream>
+#include <queue>
+
+using namespace std;
+
+struct Node
+{
+    Node(int d, Node* p = nullptr)
+        :data{d}, parent{p}, left(), right()
+    {}
+    int data;
+    Node* parent;
+    Node* left;
+    Node* right;
+};
+
+void level_order_ (Node* root)// в ширину
+{
+    queue<Node*> q;
+    q.push(root);
+    while(!q.empty())
+    {
+        Node* n = q.front();
+        q.pop();
+        cout << n->data << " ";
+        if( n->left != nullptr )
+            q.push( n ->left );
+        if( n->right != nullptr )
+            q.push( n ->right );
+    }
+};
+
+class BinTree
+{
+public:
+    BinTree():root_()
+    {}
+
+    void insert(int k)
+    {
+        insert(root_, k);
+    }
+
+    void level_order()
+    {
+        level_order_(root_);
+    }
+
+private:
+
+    void insert(Node *&n, int k)
+    {
+        Node** tmp = &n;
+        while (*tmp)
+        {
+            if ((*tmp)->data > k)
+                tmp = &(*tmp)->left;
+            else
+                tmp = &(*tmp)->right;
+        }
+        *tmp = new Node(k);
+    }
+
+    Node *root_;
+};
+
+int main()
+{
+    int n;
+    cin >> n;
+
+    BinTree bt;
+
+    for (int i = 0; i < n; ++i)
+    {
+        int tmp;
+        cin >> tmp;
+        bt.insert(tmp);
+    }
+
+    bt.level_order();
+
+    return 0;
+}
