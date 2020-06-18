@@ -1,229 +1,104 @@
+#include <algorithm>
 #include <iostream>
 #include <vector>
-#include <algorithm>
 
 using namespace std;
 
-
-struct person
+struct Date
 {
-    struct Date
-    {
-        int day;
-        int month;
-        int year;
-    };
-    Date birth;
-    Date funeral;
-};
+    int d;
+    int m;
+    int y;
+    bool is_birth;
 
-istream& operator>> (istream &is, person :: Date &d)
-{
-    return is >> d.day >> d.month >> d.year;
-}
-
-ostream& operator<< (ostream &os, const person :: Date &d)
-{
-    return os << d.day << " " << d.month << " " << d.year;
-}
-
-istream& operator>> (std::istream &is, person &p)
-{
-
-    return is >> p.birth >> p.funeral;
-}
-
-ostream& operator<< (std::ostream &os, person &p)
-{
-
-    return os << p.birth << " " << p.funeral;
-}
-
-int age (const person &p)
-{
-
-    return (p.funeral.year - p.birth.year +
-            (p.funeral.month > p.birth.month ? true : p.funeral.month == p.birth.month and
-                                               p.funeral.day >= p.birth.day)) - 1;
-}
-
-bool operator<(const person :: Date &lhs, const person :: Date &rhs)
-{
-    return (lhs.year < rhs.year ? true : lhs.year == rhs.year and lhs.month < rhs.month ? true :
-                                                                                          lhs.year == rhs.year and
-                                                                                          lhs.month == rhs.month and
-                                                                                          lhs.day < rhs.day);
-}
-
-bool operator==(const person :: Date &lhs, const person :: Date &rhs)
-{
-    return lhs.year == rhs.year and lhs.month == rhs.month and lhs.day == rhs.day;
-}
-
-bool operator<=(const person :: Date &lhs, const person :: Date &rhs)
-{
-    return lhs < rhs or lhs == rhs;
-}
-
-bool operator>(const person :: Date &lhs, const person :: Date &rhs)
-{
-    return !(lhs <= rhs);
-}
-
-template <class T>
-ostream& operator << (ostream& out, const vector<T>& a)
-{
-    for(int i = 0; i < a.size(); ++i)
-        out << a[i] << " "; 
-    return out;
-}
-
-bool coeval(const person &lhs, const person &rhs) {
-    return (rhs.birth < lhs.funeral and lhs.birth <= rhs.birth) or
-            (rhs.birth <= lhs.birth and lhs.birth < rhs.funeral);
-}
-
-template <class T>
-class Heap
-{
-public:
-    Heap()
+    Date() : d{0}, m{0}, y{0}
     {}
-    Heap(const vector<person>& arr)
+    Date(int day, int month, int year) : d{day}, m{month}, y{year}
+    {}
+
+    bool operator== (const Date &a) const
     {
-        from(arr);
-    }
-    Heap& operator=(const Heap<T>& h)
-    {
-        this->h = h.h;
-        return *this;
-    }
-    Heap& operator=(const vector<person>& arr)
-    {
-        from(arr);
-        return *this;
-    }
-    void push(const person& val)
-    {
-        h.push_back(val);
-        sift_up(h.size() - 1);
-    }
-    const person& top() const
-    {
-        return h.front();
-    }
-    void pop()
-    {
-        swap(h.front(), h.back());
-        h.pop_back();
-        sift_down(0);
+        return d == a.d && m == a.m && y == a.y;
     }
 
-    int size()
+    bool operator< (const Date &a) const
     {
-        return h.size();
-    }
-
-    friend ostream& operator << (ostream& out, const Heap& heap)
-    {
-        out << heap.h;
-        return out;
-    }
-
-private:
-    void from(const vector<person>& arr)
-    {
-        h = arr;
-        for(int i = h.size() / 2 - 1; i >= 0; --i)
-            sift_down(i);
-    }
-    void sift_up(int i)
-    {
-        while(i > 0)
+        if (y == a.y)
         {
-            int p = (i - 1) / 2;
-            if(h[i] <= h[p])//что это для персон значит??
-                return;
-            swap(h[i], h[p]);
-            i = p;
+            if (m == a.m)
+                return d < a.d;
+            return m < a.m;
         }
+        return y < a.y;
     }
-    void sift_down(int i)
-    {
-        int l = 2 * i + 1;
-        int r = l + 1;
-        int mx = i;
-        if(r < h.size() && h[r] > h[mx])
-            mx = r;
-        if(l < h.size() && h[l] > h[mx])
-            mx = l;
-        if(mx != i)
-        {
-            swap(h[i], h[mx]);
-            sift_down(mx);
-        }
-    }
-
-    vector<person> h;
 };
+
+istream &operator>> (istream &is, Date &a)
+{
+    is >> a.d >> a.m >> a.y;
+    return is;
+}
+
+int contemporaries (const vector<Date> &v)
+{
+    int sum = 0;
+    int max = 0;
+    for (auto x : v)
+    {
+        if (x.is_birth)
+            ++sum;
+        else
+            --sum;
+
+        if (sum > max)
+            max = sum;
+    }
+
+    return max == 0 ? 1 : max;
+}
 
 int main()
 {
-    int n = 0;
+    int n;
     cin >> n;
-    vector<person :: Date> data[n];
-    vector<person> a;
+    vector<Date> dates;
 
-    for (auto i = 0; i < n; ++i)
+    for (int i = 0; i < n; ++i)
     {
+        Date birth, death;
+        birth.is_birth = 1;
+        death.is_birth = 0;
 
-        person tmp{{0, 0, 0}, {0, 0, 0}};
+        cin >> birth >> death;
 
-        cin >> tmp;
-
-        if (age(tmp) < 18 or (age(tmp) == 18 and tmp.birth.month == tmp.funeral.month and tmp.birth.day == tmp.funeral.day)) {
-            --n;
-            --i;
+        if (death.y - birth.y < 18 ||
+           (death.y - birth.y == 18 && birth.m == death.m && birth.d == death.d))
             continue;
+
+        if (death.y - birth.y > 80)
+        {
+            death.y = birth.y + 80;
+            death.m = birth.m;
+            death.d = birth.d;
+        }
+        else if (death.y - birth.y == 80)
+        {
+            if (death.m > birth.m)
+            {
+
+                death.m = birth.m;
+                death.d = birth.d;
+            }
+            else if (death.m == birth.m && death.d > birth.d)
+                death.d = birth.d;
         }
 
-        if (age(tmp) >= 80) {
-            tmp.funeral.year -= (age(tmp) - 80);
-            if (tmp.funeral.month < tmp.birth.month or (tmp.funeral.month == tmp.birth.month and
-                                                        tmp.funeral.day < tmp.birth.day))
-                --tmp.funeral.year;
-            tmp.funeral.month = tmp.birth.month;
-            tmp.funeral.day = tmp.birth.day;
-        }
-
-        tmp.birth.year += 18;
-
-        a.push_back(tmp);
+        birth.y += 18;
+        dates.push_back(birth);
+        dates.push_back(death);
     }
 
-    sort(a.begin(), a.end());
+    sort(dates.begin(), dates.end(), [](Date a, Date b) { return a < b; });
 
-    Heap<person> src{};
-    int res = 0;
-
-    for (auto i = 0; i < n; ++i) {
-        if (!src.size()) {
-            src.push(a[i]);
-        }
-        else if (coeval(a[i], src.top())) {
-            src.push(a[i]);
-        }
-        else {
-            res = std::max(res, static_cast<int>(src.size()));
-            while (src.size() and !coeval(a[i], src.top()))
-                src.pop();
-            src.push(a[i]);
-        }
-    }
-
-    res = std::max(res, static_cast<int>(src.size()));
-
-
-
-    return 0;
+    cout << contemporaries(dates);
 }
