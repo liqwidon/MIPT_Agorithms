@@ -1,0 +1,160 @@
+#include <iostream>
+#include <queue>
+
+using namespace std;
+
+class btree
+{
+    struct Node
+    {
+        Node(int k): key(k), left(), right()
+        {}
+        int key;
+        Node *left;
+        Node *right;
+    };
+
+public:
+    void insert(int key)
+    {
+        insert(root_, key);
+    }
+
+    int width() const
+    {
+        int num = 0;
+        queue<Node*> q;
+        q.push(root_);
+
+        while(!q.empty())
+        {
+            int a = 0;
+
+            for(int i = 0, n = q.size(); i < n; ++i)
+            {
+                if(q.front()->left != nullptr)
+                    q.push(q.front()->left);
+                if(q.front()->right != nullptr)
+                    q.push(q.front()->right);
+                q.pop();
+                ++a;
+            }
+
+            if(num < a)
+                num = a;
+        }
+
+        return num;
+    }
+
+private:
+    void insert(Node *&n, int key)
+    {
+        if (n == nullptr)
+            n = new Node(key);
+        else if (key < n->key)
+            insert(n->left, key);
+        else insert(n->right, key);
+    }
+
+    Node* root_{nullptr};
+};
+
+
+class dtree
+{
+    struct Node
+    {
+        int key, priority;
+        Node *left;
+        Node *right;
+        Node(int k, int p): key(k), priority(p), left(), right()
+        {}
+    };
+public:
+    void insert(int k, int p)
+    {
+        insert(root_, k, p);
+    }
+
+    int width() const
+    {
+        int num = 0;
+        queue<Node*> q;
+        q.push(root_);
+
+        while(!q.empty())
+        {
+            int a = 0;
+
+            for(int i = 0, n = q.size(); i < n; ++i)
+            {
+                if(q.front()->left != nullptr)
+                    q.push(q.front()->left);
+                if(q.front()->right != nullptr)
+                    q.push(q.front()->right);
+                q.pop();
+                ++a;
+            }
+
+            if(num < a)
+                num = a;
+        }
+
+        return num;
+    }
+
+private:
+    void insert(Node *&n, int k, int p)
+    {
+        if (n == nullptr)
+            n = new Node(k, p);
+        else if (n->priority < p)
+        {
+            Node* n1 = new Node(k, p);
+            split(n, k, n1->left, n1->right);
+            n = n1;
+        }
+        else if (k < n->key)
+            insert(n->left, k, p);
+        else insert(n->right, k, p);
+    }
+
+    void split(Node *n, int k, Node *&l, Node *&r)
+    {
+        if (n == nullptr)
+        {
+            l = nullptr;
+            r = nullptr;
+        }
+        else if (k < n->key)
+        {
+            split(n->left, k, l, n->left);
+            r = n;
+        }
+        else
+        {
+            split(n->right, k, n->right, r);
+            l = n;
+        }
+    }
+    Node* root_{nullptr};
+};
+
+int main()
+{
+    btree b;
+    dtree d;
+    int n;
+    cin >> n;
+    for (int i = 0; i < n; ++i)
+    {
+        int k,p;
+        cin >> k >> p;
+        b.insert(k);
+        d.insert(k,p);
+    }
+
+    cout << d.width() - b.width();
+    return 0;
+}
