@@ -1,0 +1,199 @@
+//рекурсивно
+#include <iostream>
+#include <queue>
+
+using namespace std;
+
+///////////////// дерево
+struct Node
+{
+    Node(int d, Node* p = nullptr)
+        :data{d}, parent{p}, left(), right()
+    {}
+    int data;
+    Node* parent;
+    Node* left;
+    Node* right;
+};
+
+void pre_order(Node* n)
+{
+    if (n == nullptr) return;
+    cout << n->data;
+    pre_order(n->right);
+    pre_order(n->left);
+}
+
+void post_order(Node* n)
+{
+    if (n == nullptr) return;
+    post_order(n->right);
+    post_order(n->left);
+    cout << n->data;
+}
+
+
+void left_order(Node* n)
+{
+    if(n == nullptr) return;
+    left_order(n->left);
+    cout << n->data;
+    left_order(n->right);
+}
+
+void right_order(Node* n)
+{
+    if(n == nullptr) return;
+    right_order(n->right);
+    cout << n->data;
+    right_order(n->left);
+}
+
+void level_order (Node* root)// в ширину
+{
+    queue<Node*> q;
+    q.push(root);
+    while(!q.empty())
+    {
+        Node* n = q.front();
+        q.pop();
+        cout << n->data << " ";
+        if( n->left != nullptr )
+            q.push( n ->left );
+        if( n->right != nullptr )
+            q.push( n ->right );
+    }
+};
+////////////////////////////////////
+
+
+
+class BinTree
+{
+public:
+    BinTree():root_(){
+
+    }
+    void insert(int k)//надо бы сделать без рекурсии тоже
+    {
+        insert(root_, k);
+    }
+
+    void remove(int k)
+    {
+        if (!contains(k))
+            remove(root_, k);
+    }
+
+    bool contains1(int k)// нерекурсивный контэйнз
+    {
+        Node* n = root_;
+        while (n)
+        {
+            if (k < n->data)
+                n = n->left;
+            else if (k > n->data)
+                n = n->right;
+            else
+                return true;
+        }
+        return false;
+    }
+
+    bool contains(int k)
+    {
+        return contains(root_, k);
+    }
+
+    int findMinKey()
+    {
+        if (root_ == 0)
+            return 0;
+        Node *n = root_;
+        while (n->left)
+            n = n->left;
+        return n->data;
+    }
+
+
+    int findMaxKey()
+    {
+        if (root_ == 0)
+            return 0;
+        Node *n = root_;
+        while (n->right)
+            n = n->right;
+        return n->data;
+    }
+
+private:
+
+    void insert(Node *&n, int k)
+    {
+        if (n == nullptr)
+            n = new Node(k);
+        else if (k < n->data)
+            insert(n->left, k);
+        else
+            insert(n->right, k);
+    }
+
+    bool contains(Node* n, int k)
+    {
+        if (n == 0)
+            return false;
+        if (k < n->data)
+            return contains(n->left, k);
+        else if (k > n->data)
+            return contains(n->right, k);
+        else
+            return true;
+    }
+
+    void remove(Node *&n, int k)
+    {
+        if (n == nullptr)
+            return;
+        if (k < n->data)
+            remove(n->left, k);
+        else if (k > n->data)
+            remove(n->right, k);
+        else
+        {
+            if (n->left == 0)
+            {
+                Node* r = n->right;
+                delete n;
+                n = r;
+            }
+            else if (n->right == 0)
+            {
+                Node* l = n->left;
+                delete n;
+                n = l;
+            }
+            else
+            {
+                Node* p = n;
+                Node* mn = n->right;
+                while (mn->left)
+                {
+                    p = mn;
+                    mn = mn->left;
+                }
+                n->data = mn->data;
+                (p->left == mn ? p->left : p->right) = mn->right;
+                delete mn;
+            }
+
+        }
+    }
+
+    Node *root_;
+};
+
+int main()
+{
+    //ваш код
+    return 0;
+}
