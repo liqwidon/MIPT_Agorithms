@@ -35,11 +35,12 @@ class HashTable
     };
 public:
     HashTable()
+        :size_{0}
     {
         v.resize(8);
         state.resize(8);
     }
-    
+
     bool insert(const T& elem)
     {
         if (size_ * 4 == v.size() * 3)
@@ -48,7 +49,7 @@ public:
             vector<CellState> nstate (2 * v.size());
             for (int i = 0; i < v.size(); ++i)
                 if (state[i] == FILLED)
-                    for (int j = 0, h = myHash(v[i], nv.size()); j < nv.size(); ++j, h = (h + j + 1) % nv.size())
+                    for (int j = 0, h = myHash(v[i], nv.size()); j < nv.size(); ++j, h = (h + j - 1) % nv.size())
                         if (nstate[h] != FILLED)
                         {
                             nv[h] = v[i];
@@ -58,9 +59,9 @@ public:
             swap(v, nv);
             swap(state, nstate);
         }
-        
+
         int p = -1;
-        
+
         for (int i = 0, h = myHash(elem, v.size()); i < v.size(); ++i)
         {
             switch (state[h])
@@ -69,25 +70,25 @@ public:
             {
                 if (p == -1)
                     p = h;
-                
+
                 v[p] = elem;
                 state[p] = FILLED;
                 ++size_;
                 return true;
-                
+
             }
             case FILLED:
             {
                 if (v[h] == elem)
                     return false;
-                h = (h + i + 1) % v.size();
+                h = (h + i - 1) % v.size();
                 break;
             }
             case DELETED:
             {
                 if (p == -1)
                     p = h;
-                h = (h + i + 1) % v.size();
+                h = (h + i - 1) % v.size();
                 break;
             }
             }
@@ -101,7 +102,7 @@ public:
         }
         return false;
     }
-    
+
     bool remove(const T& elem)
     {
         for (int i = 0, h = myHash(elem, v.size()); i < v.size() ;++i)
@@ -118,16 +119,16 @@ public:
                     --size_;
                     return true;
                 }
-                h = (h + i + 1) % v.size();
+                h = (h + i - 1) % v.size();
                 break;
             case DELETED:
-                h = (h + i + 1) % v.size();
+                h = (h + i - 1) % v.size();
                 break;
             }
         }
         return false;
     }
-    
+
     bool contains(const T& elem) const
     {
         for (int i = 0, h = myHash(elem, v.size()); i < v.size() ; ++i)
@@ -139,18 +140,18 @@ public:
             case FILLED:
                 if (v[h] == elem)
                     return true;
-                h = (h + i + 1) % v.size();
+                h = (h + i - 1) % v.size();
                 break;
             case DELETED:
-                h = (h + i + 1) % v.size();
+                h = (h + i - 1) % v.size();
                 break;
             }
         }
         return false;
     }
-    
+
 private:
-    
+
     vector<T> v;
     vector<CellState> state;
     int size_;
@@ -166,7 +167,7 @@ int main()
     HashTable<string> tb;
     char cmd;
     string s;
-    
+
     while(cin >> cmd >> s)
     {
         switch (cmd)
