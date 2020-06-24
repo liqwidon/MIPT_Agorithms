@@ -49,7 +49,7 @@ public:
             vector<CellState> nstate (2 * v.size());
             for (int i = 0; i < v.size(); ++i)
                 if (state[i] == FILLED)
-                    for (int j = 0, h = myHash(v[i], nv.size()); j < nv.size(); ++j, h = (h + j - 1) % nv.size())
+                    for (int j = 0, h = myHash(v[i], nv.size()); j < nv.size(); ++j, h = (h + j + 1) % nv.size())
                         if (nstate[h] != FILLED)
                         {
                             nv[h] = v[i];
