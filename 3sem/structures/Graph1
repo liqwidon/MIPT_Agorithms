@@ -1,0 +1,184 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+
+class IGraph {
+public:
+
+    virtual ~IGraph()
+    {}
+
+    virtual void add_edge(int v, int u) = 0;
+    virtual void get_adj(int v, std:: vector<int>& a) const = 0;
+    virtual int count() const = 0;
+    virtual void output() = 0;
+    virtual bool has_edge(int v, int u) const = 0;
+};
+
+class MatrixGraph : public IGraph {
+public:
+
+    MatrixGraph(int n) {
+        this-> size = n;
+        matr = new bool* [n];
+        for (int i = 0; i < n; ++i)
+            matr[i] = new bool[n] ();
+    }
+
+    void add_edge(int v, int u) {
+        matr[v][u] = true;
+        matr[u][v] = true;
+    }
+
+    void get_adj(int v, std:: vector<int>& adges) const {
+        for (int i = 0; i < size; ++i)
+            if(matr[v][i])
+                adges.push_back(i);
+    }
+
+    void output() {
+        for (int i = 0; i < size; ++i) {
+            for (int j = 0; j < size; ++j)
+                std:: cout << matr[i][j] << " ";
+        std:: cout << '\n';
+        }
+        std:: cout << '\n';
+    }
+
+    bool has_edge(int v, int u) const {
+        return matr[v][u];
+    }
+
+    int count() const {
+        return size;
+    }
+
+private:
+    int size;
+    bool** matr;
+};
+
+class ListGraph : public IGraph {
+public:
+
+    ListGraph(int n) {
+        lst.resize(n);
+    }
+
+    void add_edge(int v, int u) {
+        if ((u != v) && (std:: find (lst[u].begin(), lst[u].end(), v) == lst[u].end())) {
+            lst[v].push_back(u);
+            lst[u].push_back(v);
+        }
+    }
+
+    void get_adj(int v, std:: vector<int>& edges) const {
+        edges = lst[v];
+    }
+
+    void output() {
+        for (int i = 0; i < lst.size(); ++i) {
+            for (int j = 0; j < lst[i].size(); ++j)
+                std:: cout << lst[i][j] << " ";
+        std:: cout << '\n';
+        }
+        std:: cout << '\n';
+    }
+
+    bool has_edge(int v, int u) const {
+        return std:: find (lst[v].begin(), lst[v].end(), u) != lst[v].end();
+    }
+
+    int count() const {
+        return lst.size();
+    }
+
+private:
+    std:: vector<std:: vector<int> > lst;
+};
+
+void initGraph(IGraph& gr) {
+    gr.add_edge(0, 0);
+    gr.add_edge(0, 1);
+    gr.add_edge(0, 3);
+    gr.add_edge(1, 2);
+    gr.add_edge(1, 3);
+    gr.output();
+}
+
+enum color {
+    WHITE = 0, GRAY, BLACK
+};
+
+///для обхода в глубину
+void dfsSearch(IGraph& gr, std:: vector<color>& colors, int v) {
+    colors[v] = GRAY;
+    std:: vector<int> a;
+    gr.get_adj(v, a);
+    std:: cout << v << " ";
+    for (int i = 0; i < a.size(); ++i)
+        if (colors[a[i]] == WHITE)
+            dfsSearch(gr, colors, a[i]);
+
+    colors[v] = BLACK;
+}
+
+///обход в глубину
+void dfs(IGraph& gr) {
+    std:: vector<color> colors(gr.count());
+    for (int v = 0; v < gr.count(); ++v)
+        if (colors[v] == WHITE)
+            dfsSearch(gr, colors, v);
+}
+
+///для поиска с родителями
+void dfsSearchPrevious(IGraph& gr, std:: vector<color>& colors, std:: vector<int>& parents, int v) {
+    colors[v] = GRAY;
+    std:: vector<int> a;
+    gr.get_adj(v, a);
+//    std:: cout << v << " ";
+    for (int i = 0; i < a.size(); ++i)
+        if (colors[a[i]] == WHITE) {
+            parents[a[i]] = v;
+            dfsSearchPrevious(gr, colors, parents, a[i]);
+        }
+    colors[v] = BLACK;
+}
+
+///поиск с родителями
+void dfsParent(IGraph& gr) {
+    std:: vector<color> colors(gr.count());
+    std:: vector<int> parents(gr.count());
+    std:: fill(parents.begin(), parents.end(), -1);
+    for (int v = 0; v < gr.count(); ++v)
+        if (colors[v] == WHITE)
+            dfsSearchPrevious(gr, colors, parents, v);
+    std:: cout << '\n';
+    for (int v = 0; v < gr.count(); ++v)
+        std:: cout << parents[v] << ' ';
+    std:: cout << '\n';
+    for (int v = 0; v < gr.count(); ++v)
+        std:: cout << colors[v] << ' ';
+}
+
+
+int main() {
+    ListGraph gr1(7);
+    initGraph(gr1);
+
+    MatrixGraph gr2(7);
+    initGraph(gr2);
+
+//    dfs(gr1);
+//    std:: cout << '\n';
+//    dfs(gr2);
+//    std:: cout << '\n';
+
+    dfsParent(gr1);
+    std:: cout << '\n';
+    std:: cout << '\n';
+    dfsParent(gr2);
+    std:: cout << '\n';
+
+    return 0;
+}
