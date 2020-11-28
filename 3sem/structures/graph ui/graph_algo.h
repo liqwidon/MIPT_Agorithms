@@ -17,4 +17,13 @@ public:
 
 bool dijkstra(IGraph* gr, long v0, long v1, vector<long>& way);
 
+/// для неориентированного графа
+/// \brief Prima
+/// \param g - неориентированный граф
+/// \param parents
+///
+void Prima(IGraph* g, std::vector<long>& parents);
+
+long PrimW(IGraph* g);
+
 #endif // DIJKSTRA_H
