@@ -26,4 +26,8 @@ void Prima(IGraph* g, std::vector<long>& parents);
 
 long PrimW(IGraph* g);
 
+void Kruskal(IGraph* g, vector<std:: pair<long, long>>& mst);
+
+long KruskalW(IGraph* g);
+
 #endif // DIJKSTRA_H

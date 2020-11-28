@@ -1,6 +1,8 @@
 #include "graph_algo.h"
+#include "disjoint_set_union.h"
 #include <limits>
 #include <algorithm>
+
 class PriorityQueue
 {
 public:
@@ -165,3 +167,56 @@ long PrimW(IGraph* g)
     return W;
 }
 
+
+void Kruskal(IGraph *g, vector<std::pair<long, long> > &mst)
+{
+    struct E
+    {
+        long u;
+        long v;
+        long w;
+    };
+
+    vector<E> edges;
+    for (long v = 0; v < g->count(); ++v)
+    {
+        vector<long> adj;
+        vector<long> weight;
+        g->getAdjacent(adj, v);
+        g->getWeight(weight, v);
+        for (int i = 0; i < adj.size(); ++i)
+            edges.push_back({v, adj[i], weight[i]});
+    }
+
+    std::sort(edges.begin(), edges.end(), [](E u, E v)
+    {
+        return u.w < v.w;
+    });
+
+    disjoint_set_union d(g->count());
+    for(auto [u, v, w] : edges)
+    {
+        if(d.find_set(u) != d.find_set(v))
+        {
+            mst.push_back({u, v});
+            d.union_sets(u, v);
+        }
+    }
+}
+
+long KruskalW(IGraph *g)
+{
+    long W = 0;
+    vector<std:: pair<long, long>> mst;
+    Kruskal(g, mst);
+    for(auto [v, u] : mst)
+    {
+        vector<long> adj;
+        vector<long> weight;
+        g->getAdjacent(adj, v);
+        g->getWeight(weight, v);
+        W += weight[std::find(adj.begin(), adj.end(), u) - adj.begin()];
+    }
+
+    return W;
+}
