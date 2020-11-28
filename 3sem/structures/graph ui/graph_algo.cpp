@@ -111,3 +111,57 @@ bool dijkstra(IGraph* gr, long v0, long v1, vector<long>& way) {
     }
     return false;
 }
+///
+
+void Prima(IGraph* g, std::vector<long>& parents)
+{
+    parents.resize(g->count());
+    std::fill(parents.begin(), parents.end(), -1);
+    std::vector<long>  d(g->count(), std::numeric_limits<long>::max());
+    std::vector<bool> usage(g->count());
+    PriorityQueue q(d);
+
+    d[0] = 0;
+    q.decreaseKey(0);
+
+    while (!q.empty()) {
+
+        long v = q.pop();
+        usage[v] = true;
+
+        vector<long> adj;
+        vector<long> weight;
+        g->getAdjacent(adj, v);
+        g->getWeight(weight, v);
+
+        for(long i = 0; i < adj.size(); ++i)
+        {
+            if (!usage[adj[i]] && weight[i] < d[adj[i]])
+            {
+                d[adj[i]] = weight[i];
+                parents[adj[i]] = v;
+                q.decreaseKey(adj[i]);
+            }
+        }
+    }
+}
+
+long PrimW(IGraph* g)
+{
+    std::vector <long> parents;
+    Prima(g, parents);
+    long W = 0;
+
+    for (long v = 1; v < parents.size(); v++)
+    {
+        long pv = parents[v];
+        vector<long> adj;
+        vector<long> weight;
+        g->getAdjacent(adj, v);
+        g->getWeight(weight, v);
+
+        W += weight[std::find(adj.begin(), adj.end(), pv) - adj.begin()];
+    }
+    return W;
+}
+

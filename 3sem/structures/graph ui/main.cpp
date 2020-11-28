@@ -23,6 +23,5 @@ int main() {
 
     dijkstra(&graph, x, y, way);
 
-
     return 0;
 }
