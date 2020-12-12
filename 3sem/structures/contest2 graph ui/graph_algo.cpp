@@ -9,11 +9,38 @@ void IGraph::addEdge (long v, long u, long w)
 
 IGraph* IGraph::createEmpty (long nv)
 {
-    return nullptr;
+    return new ListGraph(nv);
 }
 
 void IGraph::removeEdge (long v, long u)
 {}
+
+long ListGraph::count()
+{
+    return g.size();
+}
+void ListGraph::getAdjacent(vector<long> & a,long v)
+{
+  a = g[v];
+}
+void ListGraph::getWeight(vector<long> & a,long v)
+{
+    a = w[v];
+}
+void ListGraph::addEdge(long v, long u, long w)
+{
+    g[v].push_back(u);
+    this->w[v].push_back(w);
+}
+void ListGraph::removeEdge(long v, long u)
+{
+    long iu = find(g[v].begin(), g[v].end(), u) - g[v].begin();
+    if (iu < g[v].size())
+    {
+        g[v].erase(iu + g[v].begin());
+        w[v].erase(iu + w[v].begin());
+    }
+}
 
 class PriorityQueue
 {
@@ -437,7 +464,7 @@ long EdmondsKarp(IGraph* g, long s, long t)
                 wv += weightu[iv];
                 gf->removeEdge(u, v);
             }
-            wu += weightu[find(adjv.begin(), adjv.end(), u) - adjv.begin()];
+            wu += weightv[find(adjv.begin(), adjv.end(), u) - adjv.begin()];
             gf->removeEdge(v, u);
 
             if (wu != 0)
@@ -446,6 +473,7 @@ long EdmondsKarp(IGraph* g, long s, long t)
                 gf->addEdge(u, v, wv);
         }
     }
+    delete gf;
     return maxf;
 }
 

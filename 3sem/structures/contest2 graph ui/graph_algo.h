@@ -21,6 +21,25 @@ public:
     virtual IGraph* createEmpty (long nv);
 };
 
+class ListGraph : public IGraph
+{
+public:
+    ListGraph(long nv) : g(nv), w(nv) {}
+    long count();
+
+    void getAdjacent(vector<long> & a,long v);
+
+    void getWeight(vector<long> & a,long v);
+
+    void addEdge(long v, long u, long w = 1);
+
+    void removeEdge(long v, long u);
+
+private:
+    vector<vector<long>> g;
+    vector<vector<long>> w;
+};
+
 bool bfsMinWay(IGraph* g, long v0, long v1, vector<long>& w);
 
 bool dijkstra(IGraph* gr, long v0, long v1, vector<long>& way);
